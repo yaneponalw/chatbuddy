@@ -1252,14 +1252,14 @@
         
         showError(errorMessage);
     }
+}           function startChat() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('chatScreen').style.display = 'flex';
+    loadAllUsers();
+    loadMyChats();
+    loadInvitations();
+    createGlobalChat();
 }
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('chatScreen').style.display = 'flex';
-            loadAllUsers();
-            loadMyChats();
-            loadInvitations();
-            createGlobalChat();
-        }
 
         function loadAllUsers() {
             db.ref('users').on('value', (snapshot) => {
@@ -2319,6 +2319,7 @@
 </body>
 
 </html>
+
 
 
 
