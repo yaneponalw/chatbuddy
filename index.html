@@ -3,52 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💬 Чат з Запрошеннями</title>
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-    
+    <title>💬 Локальний Чат</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background: linear-gradient(135deg, #6a11cb, #2575fc); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { width: 100%; max-width: 1000px; height: 750px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .auth-screen { padding: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
-        .auth-form { width: 100%; max-width: 350px; }
-        .auth-input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; font-size: 15px; }
-        .auth-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .error { color: #ff3b30; text-align: center; margin-top: 10px; font-size: 14px; min-height: 20px; }
-        .chat-screen { display: none; flex-direction: column; height: 100%; }
-        .header { background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .main { display: flex; flex: 1; height: calc(100% - 60px); }
-        .sidebar { width: 300px; background: #f8f9ff; border-right: 1px solid #eaeaea; display: flex; flex-direction: column; }
+        .container { width: 100%; max-width: 900px; height: 700px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .auth-screen, .chat-screen { height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; }
+        .chat-screen { display: none; }
+        .auth-form { width: 100%; max-width: 300px; }
+        .auth-input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; }
+        .auth-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .error { color: #ff3b30; text-align: center; margin-top: 10px; min-height: 20px; }
+        .header { background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; padding: 15px 20px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .main { display: flex; flex: 1; width: 100%; }
+        .sidebar { width: 250px; background: #f8f9ff; padding: 20px; border-right: 1px solid #eaeaea; }
         .chat-area { flex: 1; display: flex; flex-direction: column; }
         .messages { flex: 1; padding: 20px; overflow-y: auto; background: #fafbff; }
-        .input-area { padding: 15px 20px; border-top: 1px solid #eaeaea; display: flex; gap: 10px; background: white; align-items: center; }
-        #messageInput { flex: 1; padding: 12px 15px; border: 2px solid #ddd; border-radius: 20px; font-size: 14px; outline: none; min-height: 40px; resize: none; }
-        #sendBtn { background: #6a11cb; color: white; border: none; padding: 0 25px; height: 40px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .message { max-width: 70%; margin: 8px 0; padding: 10px 15px; border-radius: 15px; word-wrap: break-word; }
+        .my-message { background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; margin-left: auto; }
+        .other-message { background: white; color: #333; border: 2px solid #f0f0f0; margin-right: auto; }
+        .input-area { padding: 15px; border-top: 1px solid #eaeaea; display: flex; gap: 10px; background: white; }
+        #messageInput { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 20px; font-size: 14px; outline: none; }
+        #sendBtn { background: #6a11cb; color: white; border: none; padding: 0 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Екран авторизації -->
         <div class="auth-screen" id="authScreen">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #333; margin-bottom: 10px;">💬 Чат з Запрошеннями</h1>
-                <div style="color: #666;">Запрошуй друзів та спілкуйся!</div>
-            </div>
-            
+            <h1 style="color: #333; margin-bottom: 20px;">💬 Локальний Чат</h1>
             <div class="auth-form">
-                <input type="email" id="email" class="auth-input" placeholder="Email">
-                <input type="password" id="password" class="auth-input" placeholder="Пароль">
-                <button class="auth-btn" onclick="login()">Увійти / Зареєструватися</button>
+                <input type="text" id="username" class="auth-input" placeholder="Ваше ім'я" autocomplete="off">
+                <button class="auth-btn" onclick="login()">Увійти в чат</button>
                 <div class="error" id="errorMessage"></div>
-                
-                <div style="text-align: center; margin-top: 30px; color: #666; font-size: 13px;">
-                    Введіть свій email та пароль<br>
-                    Якщо акаунта немає — він створиться автоматично
+                <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                    Введіть будь-яке ім'я<br>
+                    Чат працює в цьому браузері
                 </div>
             </div>
         </div>
@@ -56,48 +46,34 @@
         <!-- Екран чату -->
         <div class="chat-screen" id="chatScreen">
             <div class="header">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <button onclick="showMyProfile()" style="background: #6a11cb; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px;">👤</button>
-                    <h2>💬 Чат з Запрошеннями</h2>
-                </div>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <span id="userEmail">user@test.com</span>
-                    <button onclick="logout()" style="background: #ff3b30; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 13px;">Вийти</button>
+                <h2>💬 Чат: <span id="chatName">Загальний</span></h2>
+                <div>
+                    <span id="currentUser">Користувач</span>
+                    <button onclick="logout()" style="background: #ff3b30; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-left: 15px;">Вийти</button>
                 </div>
             </div>
             
             <div class="main">
                 <div class="sidebar">
-                    <div style="padding: 20px;">
-                        <button onclick="createChat()" style="width: 100%; padding: 12px; background: #6a11cb; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">💬 Створити чат</button>
-                    </div>
-                    <div style="padding: 20px; border-top: 1px solid #eaeaea;">
-                        <div style="font-weight: bold; color: #333; margin-bottom: 15px;">Мої чати <span id="chatsCount">0</span></div>
-                        <div id="chatsList" style="max-height: 200px; overflow-y: auto;"></div>
-                    </div>
-                    <div style="padding: 20px; border-top: 1px solid #eaeaea; flex: 1;">
-                        <div style="font-weight: bold; color: #333; margin-bottom: 15px;">Запрошення <span id="invitationsCount">0</span></div>
-                        <div id="invitationsList" style="max-height: 200px; overflow-y: auto;"></div>
-                    </div>
+                    <button onclick="createChat()" style="width: 100%; padding: 12px; background: #6a11cb; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px;">
+                        ➕ Створити чат
+                    </button>
+                    <div style="font-weight: bold; margin-bottom: 10px;">Мої чати:</div>
+                    <div id="chatsList" style="max-height: 300px; overflow-y: auto;"></div>
                 </div>
                 
                 <div class="chat-area">
-                    <div style="padding: 15px 20px; background: white; border-bottom: 1px solid #eaeaea;">
-                        <div style="font-weight: bold; font-size: 18px; color: #333;" id="chatTitle">Оберіть чат</div>
-                        <div style="font-size: 13px; color: #666;" id="chatMembers">0 учасників</div>
-                    </div>
-                    
                     <div class="messages" id="messages">
                         <div style="text-align: center; color: #666; padding: 50px 20px;">
                             <div style="font-size: 60px; margin-bottom: 20px; opacity: 0.5;">👋</div>
-                            <h3 style="margin-bottom: 10px;">Ласкаво просимо!</h3>
-                            <p>Оберіть чат або створіть новий</p>
+                            <h3 style="margin-bottom: 10px;">Ласкаво просимо в чат!</h3>
+                            <p>Створіть новий чат або оберіть існуючий</p>
                         </div>
                     </div>
                     
                     <div class="input-area">
-                        <textarea id="messageInput" placeholder="Напишіть повідомлення..." disabled></textarea>
-                        <button id="sendBtn" onclick="sendMessage()" disabled>Надіслати ✈️</button>
+                        <input type="text" id="messageInput" placeholder="Напишіть повідомлення..." disabled>
+                        <button id="sendBtn" onclick="sendMessage()" disabled>Надіслати</button>
                     </div>
                 </div>
             </div>
@@ -105,359 +81,193 @@
     </div>
 
     <script>
-        // Firebase конфігурація
-       const firebaseConfig = {
-    apiKey: "AIzaSyA8vnkCrJ5mI0t3l4QdIfAXkAOL5jTqJkY",
-    authDomain: "chatbuddy-new-v2.firebaseapp.com",
-    databaseURL: "https://chatbuddy-new-v2-default-rtdb.firebaseio.com",
-    projectId: "chatbuddy-new-v2",
-    storageBucket: "chatbuddy-new-v2.firebasestorage.app",
-    messagingSenderId: "487809357356",
-    appId: "1:487809357356:web:f9e8c6fd9872e39ac4d9da",
-    measurementId: "G-VMS4LBTJEB"
-};
-
-        // Ініціалізація Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-        const storage = firebase.storage();
-
+        // ========== ЛОКАЛЬНЕ СХОВИЩЕ ==========
         let currentUser = null;
-        let currentChat = null;
-        let allUsers = {};
+        let currentChat = 'general';
+        let chats = {};
+        let messages = {};
 
-        // Функції
+        // Завантажити дані з LocalStorage
+        function loadData() {
+            const savedChats = localStorage.getItem('chats');
+            const savedMessages = localStorage.getItem('messages');
+            
+            chats = savedChats ? JSON.parse(savedChats) : {
+                'general': { name: 'Загальний чат', createdBy: 'system', members: [] }
+            };
+            
+            messages = savedMessages ? JSON.parse(savedMessages) : {
+                'general': []
+            };
+        }
+
+        // Зберегти дані
+        function saveData() {
+            localStorage.setItem('chats', JSON.stringify(chats));
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
+
+        // ========== ФУНКЦІЇ ==========
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
             setTimeout(() => errorDiv.textContent = '', 3000);
         }
 
-        function showNotification(message) {
-            console.log('Notification:', message);
-        }
-
-        async function login() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+        function login() {
+            const username = document.getElementById('username').value.trim();
             
-            if (!email) { 
-                showError('Введіть email'); 
-                return; 
+            if (!username) {
+                showError('Введіть ваше ім\'я');
+                return;
             }
             
-            if (!password) { 
-                showError('Введіть пароль'); 
-                return; 
+            if (username.length < 2) {
+                showError('Ім\'я має бути мінімум 2 символи');
+                return;
             }
             
-            if (password.length < 6) { 
-                showError('Пароль має бути мінімум 6 символів'); 
-                return; 
+            currentUser = username;
+            loadData();
+            
+            // Додати користувача до загального чату
+            if (!chats.general.members.includes(username)) {
+                chats.general.members.push(username);
+                saveData();
             }
             
-            try {
-                let userCredential;
-                
-                try {
-                    userCredential = await auth.signInWithEmailAndPassword(email, password);
-                    showNotification('Вхід успішний! 👋');
-                } 
-                catch (signInError) {
-                    if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/wrong-password') {
-                        userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                        showNotification('Новий акаунт створено! 🎉');
-                    } else {
-                        throw signInError;
-                    }
-                }
-                
-                currentUser = userCredential.user;
-                
-                await db.ref('users/' + currentUser.uid).update({
-                    uid: currentUser.uid,
-                    email: email,
-                    name: email.split('@')[0],
-                    online: true,
-                    lastSeen: Date.now(),
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
-                });
-                
-                document.getElementById('userEmail').textContent = currentUser.email;
-                startChat();
-                
-            } catch (error) {
-                let errorMessage = '';
-                
-                switch(error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'Цей email вже зареєстрований. Спробуйте увійти.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'Невірний формат email';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'Пароль занадто слабкий. Мінімум 6 символів.';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = 'Невірний пароль. Спробуйте ще раз.';
-                        break;
-                    case 'auth/user-not-found':
-                        errorMessage = 'Користувача не знайдено. Створіть новий акаунт.';
-                        break;
-                    default:
-                        errorMessage = 'Помилка: ' + error.message;
-                }
-                
-                showError(errorMessage);
-            }
-        }
-
-        function startChat() {
+            document.getElementById('currentUser').textContent = currentUser;
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('chatScreen').style.display = 'flex';
-            loadAllUsers();
-            loadMyChats();
-            loadInvitations();
-            createGlobalChat();
+            
+            loadChats();
+            selectChat('general');
+            
+            // Автоматично оновлювати повідомлення
+            setInterval(loadMessages, 2000);
         }
 
-        function loadAllUsers() {
-            db.ref('users').on('value', (snapshot) => {
-                allUsers = snapshot.val() || {};
+        function loadChats() {
+            const container = document.getElementById('chatsList');
+            container.innerHTML = '';
+            
+            Object.keys(chats).forEach(chatId => {
+                const chat = chats[chatId];
+                const chatElement = document.createElement('div');
+                chatElement.style.cssText = 'padding: 10px; background: white; border-radius: 8px; margin-bottom: 8px; border: 2px solid #ddd; cursor: pointer;';
+                chatElement.onclick = () => selectChat(chatId);
                 
-                if (currentUser) {
-                    db.ref('users/' + currentUser.uid).update({
-                        online: true,
-                        lastSeen: Date.now()
-                    });
+                if (chatId === currentChat) {
+                    chatElement.style.borderColor = '#6a11cb';
+                    chatElement.style.background = '#f0f2ff';
                 }
+                
+                chatElement.innerHTML = `
+                    <div style="font-weight: bold;">${chat.name}</div>
+                    <div style="font-size: 12px; color: #666;">${chat.members?.length || 0} учасників</div>
+                `;
+                
+                container.appendChild(chatElement);
             });
         }
 
-        function loadMyChats() {
-            db.ref('chats').on('value', (snapshot) => {
-                const chatsData = snapshot.val();
-                const container = document.getElementById('chatsList');
-                let myChats = [];
-                container.innerHTML = '';
-                
-                if (!chatsData) {
-                    container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Ще немає чатів</div>';
-                    document.getElementById('chatsCount').textContent = '0';
-                    return;
-                }
-                
-                Object.keys(chatsData).forEach(chatId => {
-                    const chat = chatsData[chatId];
-                    chat.id = chatId;
-                    
-                    if (chat.participants && chat.participants[currentUser.uid]) {
-                        myChats.push(chat);
-                        const memberCount = chat.participants ? Object.keys(chat.participants).length : 0;
-                        const chatElement = document.createElement('div');
-                        chatElement.style.cssText = 'padding: 12px; background: white; border-radius: 10px; margin-bottom: 10px; border: 2px solid #ddd; cursor: pointer;';
-                        chatElement.onclick = () => selectChat(chat);
-                        chatElement.innerHTML = `
-                            <div style="font-weight: bold; margin-bottom: 3px;">${chat.name || 'Без назви'}</div>
-                            <div style="font-size: 12px; color: #666;">${memberCount} учасників</div>
-                        `;
-                        container.appendChild(chatElement);
-                    }
-                });
-                
-                document.getElementById('chatsCount').textContent = myChats.length;
-                if (myChats.length === 0) {
-                    container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">У вас поки немає чатів</div>';
-                }
-            });
-        }
-
-        function loadInvitations() {
-            db.ref('invitations').orderByChild('toUserId').equalTo(currentUser.uid).on('value', (snapshot) => {
-                const invitationsData = snapshot.val();
-                const container = document.getElementById('invitationsList');
-                let invitations = [];
-                container.innerHTML = '';
-                
-                if (!invitationsData) {
-                    container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Немає запрошень</div>';
-                    document.getElementById('invitationsCount').textContent = '0';
-                    return;
-                }
-                
-                Object.keys(invitationsData).forEach(invitationId => {
-                    const invitation = invitationsData[invitationId];
-                    invitation.id = invitationId;
-                    
-                    if (!invitation.status || invitation.status === 'pending') {
-                        invitations.push(invitation);
-                        const sender = allUsers[invitation.fromUserId] || {};
-                        const senderName = sender.name || sender.email || 'Невідомий';
-                        const invitationElement = document.createElement('div');
-                        invitationElement.style.cssText = 'padding: 12px; background: white; border-radius: 10px; margin-bottom: 10px; border: 2px solid #ddd;';
-                        invitationElement.innerHTML = `
-                            <div style="font-weight: bold; margin-bottom: 5px;">${senderName} запрошує вас</div>
-                            <div style="font-size: 13px; color: #666;">До чату: <strong>${invitation.chatName || 'чат'}</strong></div>
-                            <div style="margin-top: 10px; display: flex; gap: 5px;">
-                                <button onclick="acceptInvitation('${invitationId}', '${invitation.chatId}')" style="flex: 1; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Прийняти</button>
-                                <button onclick="declineInvitation('${invitationId}')" style="flex: 1; padding: 8px; background: #ff3b30; color: white; border: none; border-radius: 5px; cursor: pointer;">Відхилити</button>
-                            </div>
-                        `;
-                        container.appendChild(invitationElement);
-                    }
-                });
-                
-                document.getElementById('invitationsCount').textContent = invitations.length;
-                if (invitations.length === 0) {
-                    container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Немає нових запрошень</div>';
-                }
-            });
-        }
-
-        function createGlobalChat() {
-            db.ref('chats/global').once('value').then(snapshot => {
-                if (!snapshot.exists()) {
-                    db.ref('chats/global').set({
-                        name: '🌍 Загальний чат',
-                        participants: { [currentUser.uid]: true },
-                        createdAt: Date.now()
-                    });
-                }
-            });
-        }
-
-        function selectChat(chat) {
-            currentChat = chat;
-            document.getElementById('chatTitle').textContent = chat.name || 'Чат';
-            document.getElementById('chatMembers').textContent = `${Object.keys(chat.participants || {}).length} учасників`;
+        function selectChat(chatId) {
+            currentChat = chatId;
+            document.getElementById('chatName').textContent = chats[chatId].name;
             document.getElementById('messageInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
-            loadMessages(chat.id);
+            document.getElementById('messageInput').focus();
+            loadChats();
+            loadMessages();
         }
 
-        function loadMessages(chatId) {
-            const container = document.getElementById('messages');
-            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Завантаження...</div>';
+        function loadMessages() {
+            if (!messages[currentChat]) messages[currentChat] = [];
             
-            db.ref('messages/' + chatId).on('value', (snapshot) => {
-                const messagesData = snapshot.val();
-                container.innerHTML = '';
-                
-                if (!messagesData) {
-                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 40px 20px;">Ще немає повідомлень</div>';
-                    return;
-                }
-                
-                Object.keys(messagesData).forEach(key => {
-                    const msg = messagesData[key];
-                    const isMyMessage = msg.senderId === currentUser.uid;
-                    const messageDiv = document.createElement('div');
-                    messageDiv.style.cssText = `max-width: 70%; margin: 8px 0; padding: 12px 15px; border-radius: 15px; background: ${isMyMessage ? 'linear-gradient(135deg, #6a11cb, #2575fc)' : 'white'}; color: ${isMyMessage ? 'white' : '#333'}; ${isMyMessage ? 'margin-left: auto;' : 'margin-right: auto;'}`;
-                    messageDiv.innerHTML = `
-                        <div style="font-weight: bold; margin-bottom: 5px;">${isMyMessage ? 'Ви' : (msg.senderName || 'Користувач')}</div>
-                        <div>${msg.text || ''}</div>
-                        <div style="font-size: 11px; margin-top: 5px; text-align: right;">${new Date(msg.timestamp).toLocaleTimeString('uk-UA', {hour: '2-digit', minute: '2-digit'})}</div>
-                    `;
-                    container.appendChild(messageDiv);
-                });
-                
-                container.scrollTop = container.scrollHeight;
+            const container = document.getElementById('messages');
+            const chatMessages = messages[currentChat] || [];
+            
+            container.innerHTML = '';
+            
+            if (chatMessages.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 40px 20px;">Ще немає повідомлень. Напишіть перше! 👋</div>';
+                return;
+            }
+            
+            chatMessages.forEach(msg => {
+                const isMyMessage = msg.sender === currentUser;
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isMyMessage ? 'my-message' : 'other-message'}`;
+                messageDiv.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 5px;">${isMyMessage ? 'Ви' : msg.sender}</div>
+                    <div>${msg.text}</div>
+                    <div style="font-size: 11px; margin-top: 5px; text-align: right;">${new Date(msg.timestamp).toLocaleTimeString('uk-UA', {hour: '2-digit', minute: '2-digit'})}</div>
+                `;
+                container.appendChild(messageDiv);
             });
+            
+            container.scrollTop = container.scrollHeight;
         }
 
-        async function sendMessage() {
+        function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
             
-            if (!text || !currentChat || !currentUser) return;
+            if (!text || !currentUser) return;
             
-            try {
-                await db.ref('messages/' + currentChat.id).push({
-                    text: text,
-                    senderId: currentUser.uid,
-                    senderName: currentUser.email.split('@')[0],
-                    timestamp: Date.now()
-                });
-                
-                input.value = '';
-            } catch (error) {
-                showError('Помилка: ' + error.message);
-            }
+            if (!messages[currentChat]) messages[currentChat] = [];
+            
+            messages[currentChat].push({
+                sender: currentUser,
+                text: text,
+                timestamp: Date.now()
+            });
+            
+            saveData();
+            input.value = '';
+            loadMessages();
         }
 
-        async function createChat() {
+        function createChat() {
             const chatName = prompt('Введіть назву нового чату:');
             if (!chatName) return;
             
-            try {
-                const chatId = 'chat_' + Date.now();
-                await db.ref('chats/' + chatId).set({
-                    name: chatName,
-                    createdBy: currentUser.uid,
-                    participants: { [currentUser.uid]: true },
-                    createdAt: Date.now()
-                });
-                
-                showNotification('Чат створено!');
-                selectChat({ id: chatId, name: chatName, participants: { [currentUser.uid]: true } });
-                
-            } catch (error) {
-                showError('Помилка: ' + error.message);
-            }
-        }
-
-        async function acceptInvitation(invitationId, chatId) {
-            try {
-                await db.ref('invitations/' + invitationId).update({ status: 'accepted' });
-                await db.ref('chats/' + chatId + '/participants/' + currentUser.uid).set(true);
-                showNotification('Запрошення прийнято!');
-            } catch (error) {
-                showError('Помилка: ' + error.message);
-            }
-        }
-
-        async function declineInvitation(invitationId) {
-            try {
-                await db.ref('invitations/' + invitationId).update({ status: 'declined' });
-                showNotification('Запрошення відхилено');
-            } catch (error) {
-                showError('Помилка: ' + error.message);
-            }
-        }
-
-        function showMyProfile() {
-            alert(`Ваш профіль:\nEmail: ${currentUser.email}\nID: ${currentUser.uid.substring(0, 8)}...`);
+            const chatId = 'chat_' + Date.now();
+            chats[chatId] = {
+                name: chatName,
+                createdBy: currentUser,
+                members: [currentUser],
+                createdAt: Date.now()
+            };
+            
+            messages[chatId] = [];
+            saveData();
+            loadChats();
+            selectChat(chatId);
         }
 
         function logout() {
-            if (currentUser) {
-                db.ref('users/' + currentUser.uid).update({
-                    online: false,
-                    lastSeen: Date.now()
-                });
+            if (confirm('Вийти з чату?')) {
+                currentUser = null;
+                document.getElementById('chatScreen').style.display = 'none';
+                document.getElementById('authScreen').style.display = 'flex';
+                document.getElementById('username').value = '';
+                document.getElementById('username').focus();
             }
-            auth.signOut();
-            location.reload();
         }
 
-        // Обробка Enter для відправки повідомлення
-        document.getElementById('messageInput')?.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
+        // Обробка Enter
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
                 sendMessage();
             }
         });
 
-        // Авторизація при завантаженні
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('userEmail').textContent = currentUser.email;
-                startChat();
-            }
-        });
+        // Автоматичний фокус
+        document.getElementById('username').focus();
+
+        // Завантажити дані при запуску
+        loadData();
     </script>
 </body>
 </html>
