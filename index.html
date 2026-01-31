@@ -1222,12 +1222,12 @@
             online: true,
             lastSeen: Date.now(),
             createdAt: firebase.database.ServerValue.TIMESTAMP
-        });
+        
         
         document.getElementById('userEmail').textContent = currentUser.email;
         startChat();
         
-    } catch (error) {
+    
         let errorMessage = '';
         
         switch(error.code) {
@@ -2331,4 +2331,5 @@
 </body>
 
 </html>
+
 
