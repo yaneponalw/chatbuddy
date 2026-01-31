@@ -942,10 +942,8 @@
                 </div>
                 
                 <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #888;">
-                    Тестові акаунти (пароль 123456):<br>
-                    • user1@chat.com<br>
-                    • user2@chat.com<br>
-                    • user3@chat.com
+                    Введіть свій email та пароль:<br>
+                     Якщо акаунта немає — він створиться автоматично
                 </div>
             </div>
         </div>
@@ -1180,40 +1178,81 @@
             }
         }
 
-        async function login() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (!email) { showError('Введіть email'); return; }
-            if (!password) { showError('Введіть пароль'); return; }
-            
-            const testAccounts = ['user1@chat.com', 'user2@chat.com', 'user3@chat.com'];
-            if (!testAccounts.includes(email)) {
-                showError('Використовуйте тестові акаунти: user1@chat.com, user2@chat.com, user3@chat.com');
-                return;
+      async function login() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!email) { 
+        showError('Введіть email'); 
+        return; 
+    }
+    
+    if (!password) { 
+        showError('Введіть пароль'); 
+        return; 
+    }
+    
+    if (password.length < 6) { 
+        showError('Пароль має бути мінімум 6 символів'); 
+        return; 
+    }
+    
+    try {
+        let userCredential;
+        
+        try {
+            userCredential = await auth.signInWithEmailAndPassword(email, password);
+            showNotification('Вхід успішний! 👋');
+        } 
+        catch (signInError) {
+            if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/wrong-password') {
+                userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                showNotification('Новий акаунт створено! 🎉');
+            } else {
+                throw signInError;
             }
-            
-            if (password !== '123456') {
-                showError('Пароль для тестових акаунтів: 123456');
-                return;
-            }
-            
-            try {
-                try {
-                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                    currentUser = userCredential.user;
-                } catch {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    currentUser = userCredential.user;
-                }
-                
-                await db.ref('users/' + currentUser.uid).set({
-                    uid: currentUser.uid,
-                    email: email,
-                    name: email.split('@')[0],
-                    online: true,
-                    lastSeen: Date.now(),
-                    createdAt: Date.now()
+        }
+        
+        currentUser = userCredential.user;
+        
+        await db.ref('users/' + currentUser.uid).update({
+            uid: currentUser.uid,
+            email: email,
+            name: email.split('@')[0],
+            online: true,
+            lastSeen: Date.now(),
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+        });
+        
+        document.getElementById('userEmail').textContent = currentUser.email;
+        startChat();
+        
+    } catch (error) {
+        let errorMessage = '';
+        
+        switch(error.code) {
+            case 'auth/email-already-in-use':
+                errorMessage = 'Цей email вже зареєстрований. Спробуйте увійти.';
+                break;
+            case 'auth/invalid-email':
+                errorMessage = 'Невірний формат email';
+                break;
+            case 'auth/weak-password':
+                errorMessage = 'Пароль занадто слабкий. Мінімум 6 символів.';
+                break;
+            case 'auth/wrong-password':
+                errorMessage = 'Невірний пароль. Спробуйте ще раз.';
+                break;
+            case 'auth/user-not-found':
+                errorMessage = 'Користувача не знайдено. Створіть новий акаунт.';
+                break;
+            default:
+                errorMessage = 'Помилка: ' + error.message;
+        }
+        
+        showError(errorMessage);
+    }
+}
                 });
                 
                 document.getElementById('userEmail').textContent = currentUser.email;
@@ -2292,3 +2331,4 @@
 </body>
 
 </html>
+
